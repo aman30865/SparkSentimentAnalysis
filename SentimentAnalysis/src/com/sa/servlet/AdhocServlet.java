@@ -23,6 +23,11 @@ public class AdhocServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String text = req.getParameter("text");
 		try {
+			if(text.length() < 50)
+			{
+				resp.sendRedirect("adhoc.jsp?msg=Text must contains at least 50 characters");
+				return;
+			}
 			String output = runScript(text);
 			String lines[] = output.split("\n");
 			float neg = Float.valueOf(lines[0]);
