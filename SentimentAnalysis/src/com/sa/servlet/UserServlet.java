@@ -43,8 +43,8 @@ public class UserServlet extends HttpServlet
             String password = req.getParameter("password");
             user.setPassword(password);
             String role = req.getParameter("role");
-            if (role == null || role.trim().length() == 0)
-               role = "USER";
+            if (role == null || role.trim().length() == 0)            
+               role = "USER";        
             user.setRole(role);
 
             if ((addr == null || addr.trim().length() == 0) || (email == null || email.trim().length() == 0)
@@ -57,6 +57,10 @@ public class UserServlet extends HttpServlet
             {
                resp.sendRedirect(
                         "register.jsp?msg=Error! All the fields are mandatory. Please provide the details.");
+            }
+            else if(dao.getUserDetails(email) != null)
+            {
+            	resp.sendRedirect("register.jsp?msg=Email already exist!");
             }
             else
             {
