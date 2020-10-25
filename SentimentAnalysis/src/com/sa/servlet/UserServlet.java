@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.sa.dao.UserDAO;
 import com.sa.daoimpl.UserDAOImpl;
 import com.sa.model.User;
+import com.sa.mobile.SendMessage;
 
 public class UserServlet extends HttpServlet
 {
@@ -58,6 +59,10 @@ public class UserServlet extends HttpServlet
                resp.sendRedirect(
                         "register.jsp?msg=Error! All the fields are mandatory. Please provide the details.");
             }
+            else if(dao.getUserDetails(email)!=null)
+            {
+            	resp.sendRedirect("register.jsp?msg=Email Id Already Exist!");
+            }
             else
             {
 
@@ -69,6 +74,13 @@ public class UserServlet extends HttpServlet
          {
             String email = req.getParameter("email");
             String password = req.getParameter("password");
+            int invalid_count = 0;
+            Integer count  = (Integer) req.getSession().getAttribute("invalid_count");
+            if (count == null) {
+            	invalid_count = 0;
+            }else {
+            	invalid_count = (int) count;
+            }
             User user = dao.getUserDetails(email, password);
             if (email == null || email.trim().length() == 0 || password == null || password.trim().length() == 0)
             {
@@ -76,6 +88,7 @@ public class UserServlet extends HttpServlet
             }
             else if (user != null)
             {
+            	req.getSession().removeAttribute("invalid_count");
                req.getSession().setAttribute("user", user);
                resp.sendRedirect("welcome.jsp?msg=Successfully logged in as " + user.getFname() + " "
                         + user.getLname() + " (" + user.getRole() + ") ");
@@ -83,7 +96,22 @@ public class UserServlet extends HttpServlet
             }
             else
             {
-               resp.sendRedirect("login.jsp?msg=Invalid Credentials");
+            	invalid_count++;
+            	req.getSession().setAttribute("invalid_count", invalid_count);
+                if (invalid_count >= 5) {
+                	User u = dao.getUserDetails(email);
+                	if (u != null) {
+                		String mobile = u.getMobile();
+                    	String msg = "Someone tried to login to your Sentiment Analysis Account";
+                    	SendMessage.sendSms(mobile,msg);
+                    	resp.sendRedirect("login.jsp?msg=number of login attempts exceeded.Owner will be alerted.");
+                	}
+                	else {
+                		resp.sendRedirect("login.jsp?msg=Too many login attempts.");
+                	}
+            	}else {
+            		resp.sendRedirect("login.jsp?msg=Invalid Credentials, "+ (5-invalid_count) + " attempts left before alert.");
+            	}
             }
          }
 
