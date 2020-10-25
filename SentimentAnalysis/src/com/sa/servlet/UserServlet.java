@@ -59,10 +59,6 @@ public class UserServlet extends HttpServlet
                resp.sendRedirect(
                         "register.jsp?msg=Error! All the fields are mandatory. Please provide the details.");
             }
-            else if(dao.getUserDetails(email)!=null)
-            {
-            	resp.sendRedirect("register.jsp?msg=Email Id Already Exist!");
-            }
             else
             {
 
